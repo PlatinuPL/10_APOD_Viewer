@@ -1,3 +1,5 @@
+
+# This program can display and download "photo of the day" from the NASA API. Besides, you can read the text about this picture and save the theme on your computer.
 import tkinter as tk
 import requests, webbrowser
 from urllib import request, response
