@@ -1,5 +1,5 @@
-
 # This program can display and download "photo of the day" from the NASA API. Besides, you can read the text about this picture and save the theme on your computer.
+#APOD Viewer
 import tkinter as tk
 import requests, webbrowser
 from urllib import request, response
@@ -24,22 +24,25 @@ root.config(bg = nasa_blue)
 # Define functions
 
 def get_request():
+    """Get request data from NASA APOD API"""
     global response
+
+    #Set the parameters for the request
     url  = "https://api.nasa.gov/planetary/apod"
     api_key = "yMnakIUFJhKBXEVO3Me64b3je4rGViBX8JRg2mLl"
     date = calendar.get_date()
-    print(date)
-
     quarystring = {"api_key":api_key, "date":date}
 
+    #Call the request and turn it into a python usable format
     response = requests.request("GET", url, params = quarystring)
     response = response.json()
 
+    #Update output labels
     set_info()
-    set_picture()
 
 def set_info():
-
+    """Update output labels based on API call"""
+    #Example response
     """{'copyright': 'Dario Giannobile', 'date': '2022-09-15', 'explanation': "For northern hemisphere dwellers,
     September's Full Moon was the Harvest Moon. Reflecting warm hues at sunset it rises over the historic town of
     Castiglione di Sicilia in this telephoto view from September 9. Famed in festival, story, and song Harvest
@@ -51,26 +54,29 @@ def set_info():
     'media_type': 'image', 'service_version': 'v1', 'title': 'Harvest Moon over Sicily',
     'url': 'https://apod.nasa.gov/apod/image/2209/HarvestMoonCastiglioneSicily1024.jpg'}"""
 
+    #Update the picture date and explanation
     picture_date.config(text = response["date"], font= text_font, bg=nasa_white)
     picture_explanation.config(text=response["explanation"], font= text_font, bg=nasa_white, wraplength= 800)
 
-def set_picture():
+    #We need to use 3 images in other functions; an img, a thumb, and a full_img
     global img
-    
     global thumb
     global full_img
     url = response["url"]
  
     if response["media_type"] == "image":
-        
-
-
+        #Grab the photo that is stored in our response.
         img_response = requests.get(url, stream=True)
+
+        #Get the content of the response and use BytesIO to open it as an an image
+        #Kepp a reference to this img as this is what we can use to save the image (Image not PhotoImage)
+        #Create the full screen image for a second window    
         img_data = img_response.content
         img = Image.open(BytesIO(img_data))
         
         full_img = ImageTk.PhotoImage(img)
 
+        #Create the thumbnail for the main screen
         thumb_data = img_response.content
         thumb = Image.open(BytesIO(thumb_data))
         thumb.thumbnail((200,200))
@@ -83,14 +89,17 @@ def set_picture():
         webbrowser.open(url)
 
 def full_photo():
+    """Open the full size photo in a new window"""
     top = tk.Toplevel()
     top.title("Full APOD Photo")
     top.iconbitmap("rocket.ico")
 
+    #Load the full image to the top window
     img_label = tk.Label(top,image = full_img)
     img_label.pack()
 
 def save_photo():
+    """Save the desired photo"""
     global hdimg
     save_name = filedialog.asksaveasfilename(initialdir="./", title = "Save Image", filetypes=(("JPEG", "*.jpg"), ("All Files", "*.*")))
     hdurl = response["hdurl"]
